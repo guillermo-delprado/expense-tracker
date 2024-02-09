@@ -1,1 +1,1 @@
-<template>My app</template>
+<template>My app Test</template>
