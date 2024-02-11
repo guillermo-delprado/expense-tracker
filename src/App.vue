@@ -16,38 +16,42 @@ import AddTransaction from './components/AddTransaction.vue';
 
 import {useToast} from 'vue-toastification'
 
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
 const toast = useToast();
 
-const transactions = ref([
-    {id: 1, text: 'Netflix', amount: -19.99},
-    {id: 2, text: 'Salary', amount: 499.99},
-    {id: 3, text: 'Camera', amount: -1499.99},
-    {id: 4, text: 'Laptop', amount: -2500.00}
-]
-);
+const transactions = ref([]);
+
+onMounted (() => {
+    const savedTransactions = JSON.parse(localStorage.getItem('transactions'));
+
+    if(savedTransactions){
+        transactions.value = savedTransactions;
+    }
+});
+   
+
 
 const total = computed(() => {
-    return transactions.value.reduce((acc, t) =>{
-        return acc + t.amount;
+    return transactions.value.reduce((acc, transaction) =>{
+        return acc + transaction.amount;
     }, 0);
 });
 
 const income = computed(() => {
     return transactions.value
-    .filter((t) => t.amount > 0)
-    .reduce((acc, t) =>{
-        return acc + t.amount;
+    .filter((transaction) => transaction.amount > 0)
+    .reduce((acc, transaction) =>{
+        return acc + transaction.amount;
     }, 0)
     .toFixed(2);
 });
 
 const expenses = computed(() => {
     return transactions.value
-    .filter((t) => t.amount < 0)
-    .reduce((acc, t) =>{
-        return acc + t.amount;
+    .filter((transaction) => transaction.amount < 0)
+    .reduce((acc, transaction) =>{
+        return acc + transaction.amount;
     }, 0)
     .toFixed(2);
 });
@@ -62,6 +66,7 @@ const handleTransactionSubmitted = (transactionData) => {
 
     });
 
+
     toast.success('Transaction added')
 }
 
@@ -74,6 +79,12 @@ const handleTransactionDeleted = (id) => {
     transactions.value = transactions.value.filter(
         (transaction ) => transaction.id !== id);
 
+    savedTransactionsToLocalStorage();
     toast.success('transaction deleted')
 }
+
+    const savedTransactionsToLocalStorage = () => {
+        localStorage.setItem('transactions', JSON.stringify(transactions.value));
+    };
+
 </script>
